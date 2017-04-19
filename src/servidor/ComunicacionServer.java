@@ -13,9 +13,7 @@ public class ComunicacionServer extends Observable implements Runnable {
 	private final String GROUP_ADDRESS = "226.24.6.8";
 	private boolean life = true;
 	private boolean identificado;
-	private boolean androidIdentificado;
 	private int id;
-	private String ANDROID_ADDRESS;
 
 	public ComunicacionServer() {
 

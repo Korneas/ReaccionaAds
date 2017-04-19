@@ -8,6 +8,8 @@ public class Item {
 	private PApplet app;
 	private int x, y;
 	private PImage display;
+	private PImage[] animacion;
+	private int rate;
 
 	public Item(PApplet app, PImage display) {
 		this.app = app;
@@ -17,6 +19,16 @@ public class Item {
 	public void pintar() {
 		app.imageMode(3);
 		app.image(display, x, y);
+	}
+	
+	public void animar(){
+		app.imageMode(3);
+		if(app.frameCount%4==0 && rate < animacion.length-1){
+			rate++;
+		} else if(rate>=animacion.length-1){
+			rate=0;
+		}
+		app.image(animacion[rate], x, y);
 	}
 
 	public void mover(int x, int y) {
@@ -53,6 +65,14 @@ public class Item {
 
 	public void setDisplay(PImage display) {
 		this.display = display;
+	}
+
+	public PImage[] getAnimacion() {
+		return animacion;
+	}
+
+	public void setAnimacion(PImage[] animacion) {
+		this.animacion = animacion;
 	}
 
 }

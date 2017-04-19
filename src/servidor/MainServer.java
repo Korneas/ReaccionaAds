@@ -14,7 +14,7 @@ public class MainServer extends PApplet{
 
 		@Override
 		public void settings() {
-			size(1200, 600);
+			size(1200, 720);
 //			fullScreen();
 		}
 

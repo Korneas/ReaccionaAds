@@ -13,7 +13,7 @@ public class MainCliente extends PApplet{
 
 		@Override
 		public void settings() {
-			size(1000, 300);
+			size(800, 500);
 		}
 
 		@Override

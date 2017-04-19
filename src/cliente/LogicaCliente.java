@@ -24,7 +24,13 @@ public class LogicaCliente implements Observer {
 	private PFont fuente;
 	private int animMsg;
 
+	private int mX, mY, actualX, actualY;
+
 	private boolean start, check, action, online;
+
+	private int tranquilo;
+	private PImage[] bebe;
+	private int doveAnim;
 
 	public LogicaCliente(PApplet app) {
 		super();
@@ -49,16 +55,23 @@ public class LogicaCliente implements Observer {
 
 		img = new PImage[10];
 
-		img[0] = app.loadImage("spoon.png");
+		img[0] = app.loadImage("dove/mano.png");
+//		img[1] = app.loadImage("");
 
 		item = new Item(app, img[0]);
-		item.mover(300, app.height / 2);
+		item.mover(app.width / 2, app.height / 2);
+
+		bebe = new PImage[15];
+
+		for (int i = 0; i < bebe.length; i++) {
+			bebe[i] = app.loadImage("dove/bebe_Atras" + i + ".png");
+		}
 
 		color = new int[6][3];
 
-		color[0][0] = 180;
-		color[0][1] = 20;
-		color[0][2] = 20;
+		color[0][0] = 220;
+		color[0][1] = 240;
+		color[0][2] = 255;
 
 		color[1][0] = 255;
 		color[1][1] = 255;
@@ -117,18 +130,28 @@ public class LogicaCliente implements Observer {
 			app.background(color[pantalla][0], color[pantalla][1], color[pantalla][2]);
 			switch (pantalla) {
 			case 0:
-				if (check) {
-					item.mover(app.mouseX, app.height / 2);
-				}
-
-				if (item.getX() <= 850 && action == false) {
-					try {
-						red.enviar(new Mensaje(id, "accion"), GROUP_ADDRESS);
-					} catch (IOException e) {
-						e.printStackTrace();
+				item.animar();
+				
+				if (check && !action) {
+					if (app.mouseX != actualX && app.mouseY != actualY) {
+						tranquilo++;
+						actualX = app.mouseX;
+						actualY = app.mouseY;
+						System.out.println(tranquilo);
 					}
-					action = true;
+					
+					app.image(img[0], app.mouseX, app.mouseY);
+
+					if (tranquilo == 100 && !action) {
+						try {
+							red.enviar(new Mensaje(id, "dove"), GROUP_ADDRESS);
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+						action = true;
+					}
 				}
+				
 				break;
 			case 1:
 				break;
@@ -141,29 +164,13 @@ public class LogicaCliente implements Observer {
 			case 5:
 				break;
 			}
-			item.pintar();
 		}
 	}
 
 	public void click() {
 		if (app.mousePressed) {
-
-			switch (pantalla) {
-			case 0:
-				if (item.validar(app.mouseX, app.mouseY)) {
-					check = true;
-				}
-				break;
-			case 1:
-				break;
-			case 2:
-				break;
-			case 3:
-				break;
-			case 4:
-				break;
-			case 5:
-				break;
+			if (item.validar(app.mouseX, app.mouseY)) {
+				check = true;
 			}
 		}
 	}
@@ -180,7 +187,7 @@ public class LogicaCliente implements Observer {
 
 			if (m.getMsg().contains("comenzar")) {
 				start = true;
-				System.out.println(id);
+				item.setAnimacion(bebe);
 			}
 
 			if (m.getAutor() == 2) {
