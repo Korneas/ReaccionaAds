@@ -42,10 +42,11 @@ public class LogicaServer implements Observer {
 	private float f, var;
 
 	private int nescafe;
+	private boolean cafeGo;
 	private int[] cafeWinner;
 	private boolean[] cafeDone;
-	private int cafeAnim, cafeTint;
-	private String cafeMsg = "¿Te arriesgarias a tomar cafe con un extraño";
+	private int cafeAnim, cafeTint, cafe;
+	private String cafeMsg = "¿Te arriesgarias a tomar cafe\ncon un extraño?";
 
 	public LogicaServer(PApplet app) {
 		this.app = app;
@@ -232,6 +233,44 @@ public class LogicaServer implements Observer {
 				}
 				break;
 			case 1:
+				switch (nescafe) {
+				case 0:
+					app.textAlign(3);
+					char[] cafeArray = cafeMsg.toCharArray();
+					String cafeMsgAnimado = "";
+
+					for (int i = 0; i < cafeAnim; i++) {
+						cafeMsgAnimado += cafeArray[i];
+					}
+
+					if (app.frameCount % 4 == 0 && cafeAnim < cafeArray.length) {
+						cafeAnim++;
+					}
+
+					if (cafeMsgAnimado.toCharArray().length == cafeArray.length && !cafeGo) {
+						try {
+							red.enviar(new Mensaje(id, "next"), GROUP_ADDRESS);
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+						cafeGo = true;
+					}
+
+					app.fill(255, cafeTint);
+					if (cafeTint < 255) {
+						cafeTint += 3;
+					}
+					app.textLeading(60);
+					app.text(cafeMsgAnimado, app.width / 2, app.height / 2);
+
+					break;
+				case 1:
+					break;
+				case 2:
+					break;
+				case 3:
+					break;
+				}
 				break;
 			case 2:
 				break;
@@ -256,12 +295,8 @@ public class LogicaServer implements Observer {
 					}
 				}
 
-				if (pantalla != 0) {
-					try {
-						red.enviar(new Mensaje(id, "next"), GROUP_ADDRESS);
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
+				if (dove == 1) {
+					pantalla = 1;
 				}
 			}
 		}
@@ -289,10 +324,6 @@ public class LogicaServer implements Observer {
 				doveWinner = m.getAutor();
 				doveDone = true;
 				snd.triggerSample(0);
-			}
-
-			if (m.getMsg().contains("next") && !cafeDone[0] && !cafeDone[1]) {
-				pantalla = 1;
 			}
 		}
 	}

@@ -24,13 +24,14 @@ public class LogicaCliente implements Observer {
 	private PFont fuente;
 	private int animMsg;
 
-	private int mX, mY, actualX, actualY;
+	private int actualX, actualY;
 
 	private boolean start, check, action, online;
 
 	private int tranquilo;
 	private PImage[] bebe;
-	private int doveAnim;
+
+	private String opcionNo, opcionSi;
 
 	public LogicaCliente(PApplet app) {
 		super();
@@ -50,13 +51,15 @@ public class LogicaCliente implements Observer {
 			e.printStackTrace();
 		}
 
-		pantalla = 0;
-		// start = true;
+		pantalla = 1;
+		start = true;
+
+		fuente = app.loadFont("Dosis-Medium-62.vlw");
 
 		img = new PImage[10];
 
 		img[0] = app.loadImage("dove/mano.png");
-//		img[1] = app.loadImage("");
+		// img[1] = app.loadImage("");
 
 		item = new Item(app, img[0]);
 		item.mover(app.width / 2, app.height / 2);
@@ -67,15 +70,18 @@ public class LogicaCliente implements Observer {
 			bebe[i] = app.loadImage("dove/bebe_Atras" + i + ".png");
 		}
 
+		opcionNo = "No lo sé,\nen otra ocasión";
+		opcionSi = "Si, con todo\nel gusto";
+
 		color = new int[6][3];
 
 		color[0][0] = 220;
 		color[0][1] = 240;
 		color[0][2] = 255;
 
-		color[1][0] = 255;
-		color[1][1] = 255;
-		color[1][2] = 255;
+		color[1][0] = 220;
+		color[1][1] = 25;
+		color[1][2] = 25;
 
 		color[2][0] = 255;
 		color[2][1] = 255;
@@ -99,7 +105,8 @@ public class LogicaCliente implements Observer {
 
 	public void ejecutar() {
 		app.background(0);
-		// app.textFont(fuente);
+		app.textFont(fuente);
+		app.textSize(12);
 		app.textAlign(3);
 
 		if (!online) {
@@ -131,7 +138,7 @@ public class LogicaCliente implements Observer {
 			switch (pantalla) {
 			case 0:
 				item.animar();
-				
+
 				if (check && !action) {
 					if (app.mouseX != actualX && app.mouseY != actualY) {
 						tranquilo++;
@@ -139,7 +146,7 @@ public class LogicaCliente implements Observer {
 						actualY = app.mouseY;
 						System.out.println(tranquilo);
 					}
-					
+
 					app.image(img[0], app.mouseX, app.mouseY);
 
 					if (tranquilo == 100 && !action) {
@@ -151,9 +158,14 @@ public class LogicaCliente implements Observer {
 						action = true;
 					}
 				}
-				
+
 				break;
 			case 1:
+				app.textAlign(3);
+				app.textSize(42);
+				app.textLeading(42);
+				app.text(opcionNo, app.width / 3, app.height / 2);
+				app.text(opcionSi, (app.width / 3) * 2, app.height / 2);
 				break;
 			case 2:
 				break;
