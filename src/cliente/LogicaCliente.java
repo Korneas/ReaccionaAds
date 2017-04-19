@@ -24,7 +24,7 @@ public class LogicaCliente implements Observer {
 	private PFont fuente;
 	private int animMsg;
 
-	private boolean start, check;
+	private boolean start, check, action, online;
 
 	public LogicaCliente(PApplet app) {
 		super();
@@ -36,7 +36,7 @@ public class LogicaCliente implements Observer {
 		red.addObserver(this);
 
 		GROUP_ADDRESS = red.getGroupAddress();
-		id = red.getId();
+		id = red.getId() - 1;
 
 		try {
 			red.enviar(new Mensaje(id, "conectado"), GROUP_ADDRESS);
@@ -45,7 +45,7 @@ public class LogicaCliente implements Observer {
 		}
 
 		pantalla = 0;
-//		start = true;
+		// start = true;
 
 		img = new PImage[10];
 
@@ -89,6 +89,14 @@ public class LogicaCliente implements Observer {
 		// app.textFont(fuente);
 		app.textAlign(3);
 
+		if (!online) {
+			app.text("Faltan usuarios", app.width / 2, (app.height / 2) + 20);
+		} else {
+			app.fill(0, 255, 0);
+			app.text("Usuarios minimos disponibles", app.width / 2, (app.height / 2) + 20);
+			app.fill(255);
+		}
+
 		String mensajeCarga = "Esperando...";
 		char[] msgCarga = mensajeCarga.toCharArray();
 		String mensajeAnimado = "";
@@ -109,8 +117,17 @@ public class LogicaCliente implements Observer {
 			app.background(color[pantalla][0], color[pantalla][1], color[pantalla][2]);
 			switch (pantalla) {
 			case 0:
-				if(check){
-					item.mover(app.mouseX, app.height/2);
+				if (check) {
+					item.mover(app.mouseX, app.height / 2);
+				}
+
+				if (item.getX() <= 850 && action == false) {
+					try {
+						red.enviar(new Mensaje(id, "accion"), GROUP_ADDRESS);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					action = true;
 				}
 				break;
 			case 1:
@@ -160,8 +177,26 @@ public class LogicaCliente implements Observer {
 
 		if (arg instanceof Mensaje) {
 			Mensaje m = (Mensaje) arg;
+
 			if (m.getMsg().contains("comenzar")) {
 				start = true;
+				System.out.println(id);
+			}
+
+			if (m.getAutor() == 2) {
+				online = true;
+			}
+
+			if (m.getAutor() == 0) {
+				if (m.getMsg().contains("next")) {
+					pantalla++;
+					action = false;
+					item.mover(300, app.height / 2);
+				}
+			}
+
+			if (m.getMsg().contains("win")) {
+
 			}
 		}
 

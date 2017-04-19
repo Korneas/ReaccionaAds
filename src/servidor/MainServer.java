@@ -5,7 +5,7 @@ import processing.core.PApplet;
 
 public class MainServer extends PApplet{
 
-		private LogicaCliente log;
+		private LogicaServer log;
 
 		public static void main(String[] args) {
 			System.setProperty("java.net.preferIPv4Stack", "true");
@@ -14,13 +14,13 @@ public class MainServer extends PApplet{
 
 		@Override
 		public void settings() {
-//			size(1200, 600);
-			fullScreen();
+			size(1200, 600);
+//			fullScreen();
 		}
 
 		@Override
 		public void setup() {
-			log = new LogicaCliente(this);
+			log = new LogicaServer(this);
 		}
 
 		@Override
@@ -28,5 +28,12 @@ public class MainServer extends PApplet{
 			background(0);
 			log.ejecutar();
 		}
+		
+		@Override
+		public void keyPressed(){
+			log.tecla();
+		}
+		
+		
 		
 	}

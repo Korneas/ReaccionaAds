@@ -1,11 +1,14 @@
 package servidor;
 
+import java.io.IOException;
 import java.util.Observable;
 import java.util.Observer;
 
 import processing.core.PApplet;
 import processing.core.PFont;
 import processing.core.PImage;
+import processing.video.*;
+import serial.Mensaje;
 
 public class LogicaServer implements Observer {
 
@@ -20,14 +23,28 @@ public class LogicaServer implements Observer {
 	private int[][] color;
 	private PFont fuente;
 
+	private Movie[] movies;
+
 	private boolean start;
 
 	public LogicaServer(PApplet app) {
 		this.app = app;
 
-		GROUP_ADDRESS = "";
+		red = new ComunicacionServer();
+		new Thread(red).start();
+
+		GROUP_ADDRESS = red.getGroupAddress();
+		id = red.getId() - 1;
 
 		pantalla = 0;
+
+		movies = new Movie[5];
+
+		movies[0] = new Movie(app, "movie/movie.mov");
+		movies[1] = new Movie(app, "movie/movie.mov");
+		movies[2] = new Movie(app, "movie/movie.mov");
+		movies[3] = new Movie(app, "movie/movie.mov");
+		movies[4] = new Movie(app, "movie/movie.mov");
 
 		img = new PImage[10];
 
@@ -59,12 +76,13 @@ public class LogicaServer implements Observer {
 	}
 
 	public void ejecutar() {
-		
+
 		if (start) {
+			app.imageMode(3);
 			app.background(color[pantalla][0], color[pantalla][1], color[pantalla][2]);
 			switch (pantalla) {
 			case 0:
-				// app.image(img[0], 50, 50);
+				app.image(movies[0], app.width / 2, app.height / 2);
 				break;
 			case 1:
 				break;
@@ -80,9 +98,41 @@ public class LogicaServer implements Observer {
 		}
 	}
 
+	public void tecla() {
+		if (app.keyPressed) {
+			if (app.key == ' ') {
+				if (pantalla == 0) {
+					try {
+						red.enviar(new Mensaje(id, "comenzar"), GROUP_ADDRESS);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+
+				if (pantalla != 0) {
+					try {
+						red.enviar(new Mensaje(id, "next"), GROUP_ADDRESS);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+	}
+
+	public void movieEvent(Movie m) {
+		m.read();
+	}
+
 	@Override
 	public void update(Observable o, Object arg) {
-		// TODO Auto-generated method stub
+		if (arg instanceof Mensaje) {
+			Mensaje m = (Mensaje) arg;
 
+			if (m.getMsg().contains("comenzar")) {
+				start = true;
+				movies[0].play();
+			}
+		}
 	}
 }

@@ -1,4 +1,4 @@
-package cliente;
+package serial;
 
 import java.io.Serializable;
 

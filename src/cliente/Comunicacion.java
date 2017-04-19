@@ -4,6 +4,8 @@ import java.io.*;
 import java.net.*;
 import java.util.Observable;
 
+import serial.MensajeID;
+
 public class Comunicacion extends Observable implements Runnable {
 
 	public MulticastSocket mSocket;
