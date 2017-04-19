@@ -28,6 +28,11 @@ public class LogicaServer implements Observer {
 
 	private boolean start;
 
+	private boolean goMarke;
+	private int animMarke, animOffset;
+	private int animTint;
+	private PImage[] logoAnimacion;
+
 	private int dove;
 	private int doveWinner;
 	private boolean doveDone, llorar;
@@ -44,9 +49,10 @@ public class LogicaServer implements Observer {
 	private int nescafe;
 	private boolean cafeGo;
 	private int[] cafeWinner;
-	private boolean[] cafeDone;
+	private int cafeNum;
+	private boolean cafeDone;
 	private int cafeAnim, cafeTint, cafe;
-	private String cafeMsg = "¿Te arriesgarias a tomar cafe\ncon un extraño?";
+	private String cafeMsg = "¿Te arriesgarias a tomar cafe\ncon un desconocido?";
 
 	public LogicaServer(PApplet app) {
 		this.app = app;
@@ -64,6 +70,13 @@ public class LogicaServer implements Observer {
 		pantalla = 0;
 		fuente = app.loadFont("Dosis-Medium-62.vlw");
 
+		logoAnimacion = new PImage[115];
+
+		for (int i = 0; i < logoAnimacion.length; i++) {
+			int j = i + 37;
+			logoAnimacion[i] = app.loadImage("cambioPantalla/marke" + j + ".png");
+		}
+
 		movies = new Movie[5];
 
 		// movies[0] = new Movie(app, "movie/movie.mov");
@@ -76,6 +89,8 @@ public class LogicaServer implements Observer {
 
 		img[0] = app.loadImage("dove/dove_Logo.png");
 		img[1] = app.loadImage("dove/heart.png");
+		img[2] = app.loadImage("markeLogo.png");
+		img[3] = app.loadImage("Nescafe_.png");
 
 		bebe = new PImage[15];
 
@@ -85,7 +100,7 @@ public class LogicaServer implements Observer {
 
 		heart = app.loadShape("dove/heartDove.svg");
 
-		cafeDone = new boolean[2];
+		cafeWinner = new int[2];
 
 		color = new int[6][3];
 
@@ -118,6 +133,8 @@ public class LogicaServer implements Observer {
 	public void ejecutar() {
 
 		app.textFont(fuente);
+		app.imageMode(3);
+		app.image(img[2], app.width / 2, app.height / 2);
 
 		if (start) {
 			app.imageMode(3);
@@ -236,39 +253,43 @@ public class LogicaServer implements Observer {
 				switch (nescafe) {
 				case 0:
 					app.textAlign(3);
-					char[] cafeArray = cafeMsg.toCharArray();
-					String cafeMsgAnimado = "";
+					if (!cafeDone) {
+						char[] cafeArray = cafeMsg.toCharArray();
+						String cafeMsgAnimado = "";
 
-					for (int i = 0; i < cafeAnim; i++) {
-						cafeMsgAnimado += cafeArray[i];
-					}
-
-					if (app.frameCount % 4 == 0 && cafeAnim < cafeArray.length) {
-						cafeAnim++;
-					}
-
-					if (cafeMsgAnimado.toCharArray().length == cafeArray.length && !cafeGo) {
-						try {
-							red.enviar(new Mensaje(id, "next"), GROUP_ADDRESS);
-						} catch (IOException e) {
-							e.printStackTrace();
+						for (int i = 0; i < cafeAnim; i++) {
+							cafeMsgAnimado += cafeArray[i];
 						}
-						cafeGo = true;
-					}
 
-					app.fill(255, cafeTint);
-					if (cafeTint < 255) {
-						cafeTint += 3;
-					}
-					app.textLeading(60);
-					app.text(cafeMsgAnimado, app.width / 2, app.height / 2);
+						if (app.frameCount % 4 == 0 && cafeAnim < cafeArray.length) {
+							cafeAnim++;
+						}
 
+						if (cafeMsgAnimado.toCharArray().length == cafeArray.length && !cafeGo) {
+							try {
+								red.enviar(new Mensaje(id, "next"), GROUP_ADDRESS);
+							} catch (IOException e) {
+								e.printStackTrace();
+							}
+							cafeGo = true;
+						}
+
+						app.fill(255, cafeTint);
+						if (cafeTint < 255) {
+							cafeTint += 3;
+						}
+						app.textLeading(60);
+						app.text(cafeMsgAnimado, app.width / 2, app.height / 2);
+					} else {
+						app.image(img[3], app.width/2, app.height/2);
+						app.fill(255);
+						app.textAlign(3);
+						app.text("Los mejores momentos se viven juntos", app.width/2, 650);
+					}
 					break;
 				case 1:
 					break;
 				case 2:
-					break;
-				case 3:
 					break;
 				}
 				break;
@@ -280,6 +301,27 @@ public class LogicaServer implements Observer {
 				break;
 			case 5:
 				break;
+			}
+
+			if (goMarke) {
+				app.background(250, animTint);
+				if (animTint < 255) {
+					animTint += 2;
+				} else {
+					if (animMarke < logoAnimacion.length - 1) {
+						animMarke++;
+					} else {
+						animOffset++;
+						if (animOffset >= 150) {
+							pantalla++;
+							animTint = 0;
+							animMarke = 0;
+							goMarke = false;
+						}
+					}
+					app.image(logoAnimacion[animMarke], app.width / 2, app.height / 2);
+
+				}
 			}
 		}
 	}
@@ -296,8 +338,9 @@ public class LogicaServer implements Observer {
 				}
 
 				if (dove == 1) {
-					pantalla = 1;
+					goMarke = true;
 				}
+
 			}
 		}
 	}
@@ -310,13 +353,14 @@ public class LogicaServer implements Observer {
 	public void update(Observable o, Object arg) {
 		if (arg instanceof Mensaje) {
 			Mensaje m = (Mensaje) arg;
-			System.out.println("Tengo mensaje de: " + m.getAutor());
+			System.out.println("Tengo mensaje de: " + m.getAutor() + " Dice: "+m.getMsg());
 
 			if (m.getMsg().contains("comenzar")) {
 				start = true;
 				snd.reproducir();
-				// snd.triggerSample(1);
-				pantalla = 1;
+				snd.triggerSample(1);
+
+				// pantalla = 1;
 				// movies[0].play();
 			}
 
@@ -324,6 +368,15 @@ public class LogicaServer implements Observer {
 				doveWinner = m.getAutor();
 				doveDone = true;
 				snd.triggerSample(0);
+			}
+
+			if (m.getMsg().contains("cafeSi") && !cafeDone) {
+				cafeWinner[cafeNum] = m.getAutor();
+				cafeNum++;
+
+				if (cafeWinner[0] != 0 && cafeWinner[1] != 0) {
+					cafeDone = true;
+				}
 			}
 		}
 	}

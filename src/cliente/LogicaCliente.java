@@ -32,6 +32,7 @@ public class LogicaCliente implements Observer {
 	private PImage[] bebe;
 
 	private String opcionNo, opcionSi;
+	private boolean elegido;
 
 	public LogicaCliente(PApplet app) {
 		super();
@@ -51,15 +52,15 @@ public class LogicaCliente implements Observer {
 			e.printStackTrace();
 		}
 
-		pantalla = 1;
-		start = true;
+		pantalla = 0;
+		// start = true;
 
 		fuente = app.loadFont("Dosis-Medium-62.vlw");
 
 		img = new PImage[10];
 
 		img[0] = app.loadImage("dove/mano.png");
-		// img[1] = app.loadImage("");
+		img[1] = app.loadImage("markeLogo.png");
 
 		item = new Item(app, img[0]);
 		item.mover(app.width / 2, app.height / 2);
@@ -105,15 +106,19 @@ public class LogicaCliente implements Observer {
 
 	public void ejecutar() {
 		app.background(0);
+		app.imageMode(3);
+		app.image(img[1], app.width / 2, app.height / 2- 50);
 		app.textFont(fuente);
-		app.textSize(12);
+		app.textSize(20);
 		app.textAlign(3);
 
+		app.fill(200, 60, 60);
+
 		if (!online) {
-			app.text("Faltan usuarios", app.width / 2, (app.height / 2) + 20);
+			app.text("Faltan usuarios", app.width / 2, (app.height / 2) + 200);
 		} else {
 			app.fill(0, 255, 0);
-			app.text("Usuarios minimos disponibles", app.width / 2, (app.height / 2) + 20);
+			app.text("Usuarios minimos disponibles", app.width / 2, (app.height / 2) + 200);
 			app.fill(255);
 		}
 
@@ -125,7 +130,7 @@ public class LogicaCliente implements Observer {
 			mensajeAnimado += msgCarga[i];
 		}
 
-		app.text(mensajeAnimado, app.width / 2, app.height / 2);
+		app.text(mensajeAnimado, app.width / 2, app.height / 2 + 180);
 
 		if (app.frameCount % 12 == 0 && animMsg < mensajeCarga.toCharArray().length) {
 			animMsg++;
@@ -164,8 +169,22 @@ public class LogicaCliente implements Observer {
 				app.textAlign(3);
 				app.textSize(42);
 				app.textLeading(42);
-				app.text(opcionNo, app.width / 3, app.height / 2);
-				app.text(opcionSi, (app.width / 3) * 2, app.height / 2);
+				if (!elegido) {
+					app.fill(120, 10, 10);
+					if (zonaSensible(140, 200, 400, 300)) {
+						app.fill(255);
+					}
+					app.text(opcionNo, app.width / 3, app.height / 2);
+
+					app.fill(120, 10, 10);
+					if (zonaSensible(415, 200, 645, 300)) {
+						app.fill(255);
+					}
+
+					app.text(opcionSi, (app.width / 3) * 2, app.height / 2);
+				} else {
+					app.text("¡Gracias por tu respuesta!", app.width / 2, app.height / 2);
+				}
 				break;
 			case 2:
 				break;
@@ -184,7 +203,30 @@ public class LogicaCliente implements Observer {
 			if (item.validar(app.mouseX, app.mouseY)) {
 				check = true;
 			}
+
+			if (pantalla == 1) {
+				System.out.println(app.mouseX + ":" + app.mouseY);
+				if (zonaSensible(140, 200, 400, 300)) {
+					elegido = true;
+				}
+
+				if (zonaSensible(415, 200, 645, 300)) {
+					elegido = true;
+					try {
+						red.enviar(new Mensaje(id, "cafeSi"), GROUP_ADDRESS);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
 		}
+	}
+
+	public boolean zonaSensible(int x1, int y1, int x2, int y2) {
+		if (app.mouseX > x1 && app.mouseX < x2 && app.mouseY > y1 && app.mouseY < y2) {
+			return true;
+		}
+		return false;
 	}
 
 	public void release() {
