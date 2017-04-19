@@ -7,6 +7,7 @@ import java.util.Observer;
 import processing.core.PApplet;
 import processing.core.PFont;
 import processing.core.PImage;
+import processing.core.PShape;
 import processing.video.*;
 import serial.Mensaje;
 
@@ -20,7 +21,6 @@ public class LogicaServer implements Observer {
 
 	private int pantalla;
 	private PImage[] img;
-	private PImage[] logo;
 	private int[][] color;
 	private PFont fuente;
 
@@ -35,7 +35,17 @@ public class LogicaServer implements Observer {
 	private int doveAnim;
 	private int doveTint;
 	private int animBebe;
-	private String doveMsg = "Ser mam� se lleva\na todas partes";
+	private String doveMsg = "Ser mama se lleva\na todas partes";
+	private PShape heart;
+	private float doveRotar, doveRotar2;
+	private boolean doveMov, doveMov2;
+	private float f, var;
+
+	private int nescafe;
+	private int[] cafeWinner;
+	private boolean[] cafeDone;
+	private int cafeAnim, cafeTint;
+	private String cafeMsg = "¿Te arriesgarias a tomar cafe con un extraño";
 
 	public LogicaServer(PApplet app) {
 		this.app = app;
@@ -72,15 +82,19 @@ public class LogicaServer implements Observer {
 			bebe[i] = app.loadImage("dove/bebeAdelante" + i + ".png");
 		}
 
+		heart = app.loadShape("dove/heartDove.svg");
+
+		cafeDone = new boolean[2];
+
 		color = new int[6][3];
 
 		color[0][0] = 220;
 		color[0][1] = 240;
 		color[0][2] = 255;
 
-		color[1][0] = 255;
-		color[1][1] = 255;
-		color[1][2] = 255;
+		color[1][0] = 220;
+		color[1][1] = 25;
+		color[1][2] = 25;
 
 		color[2][0] = 255;
 		color[2][1] = 255;
@@ -143,13 +157,19 @@ public class LogicaServer implements Observer {
 					break;
 				case 1:
 					app.tint(255, doveTint);
-					app.image(img[0], 180, 480);
+					app.image(img[0], app.width / 2, 500);
 					if (doveTint < 255) {
 						doveTint += 3;
 					}
 					app.tint(255, 255);
 
-					app.image(img[1], 820, 300);
+					app.image(img[1], app.width / 2, 200);
+					app.textAlign(3);
+					app.textSize(25);
+					app.fill(250, 150, 100);
+					app.text("Ganador de 25% de descuento:\nCarrito #" + doveWinner, app.width / 2, 405);
+
+					app.textSize(62);
 
 					char[] doveArray = doveMsg.toCharArray();
 					String doveMsgAnimado = "";
@@ -162,13 +182,51 @@ public class LogicaServer implements Observer {
 						doveAnim++;
 					}
 
-					app.textAlign(PApplet.LEFT);
 					app.fill(60, 60, 100);
 					app.textLeading(60);
-					app.text(doveMsgAnimado, 50, 610);
+					app.text(doveMsgAnimado, app.width / 2, 620);
 					app.fill(255);
 
-					
+					f += 0.06;
+					var = (PApplet.sin(f) * 20);
+
+					app.pushMatrix();
+					app.translate(app.width / 2 + 150, 250);
+					app.rotate(doveRotar);
+					app.shapeMode(3);
+					app.shape(heart, 0, 0, (int) (heart.getWidth() * 0.4) + var, (int) (heart.getHeight() * 0.4) + var);
+
+					if (doveRotar > 0.6) {
+						doveMov = true;
+					} else if (doveRotar < -0.6) {
+						doveMov = false;
+					}
+
+					if (doveMov) {
+						doveRotar -= 0.02;
+					} else {
+						doveRotar += 0.02;
+					}
+					app.popMatrix();
+
+					app.pushMatrix();
+					app.translate(app.width / 2 - 130, 300);
+					app.rotate(doveRotar2);
+					app.shapeMode(3);
+					app.shape(heart, 0, 0, (int) (heart.getWidth() * 0.2) + var, (int) (heart.getHeight() * 0.2) + var);
+
+					if (doveRotar2 > 0.6) {
+						doveMov2 = true;
+					} else if (doveRotar2 < -0.6) {
+						doveMov2 = false;
+					}
+
+					if (doveMov2) {
+						doveRotar2 -= 0.01;
+					} else {
+						doveRotar2 += 0.01;
+					}
+					app.popMatrix();
 
 					break;
 				}
@@ -223,7 +281,7 @@ public class LogicaServer implements Observer {
 				start = true;
 				snd.reproducir();
 				// snd.triggerSample(1);
-				dove = 1;
+				pantalla = 1;
 				// movies[0].play();
 			}
 
@@ -231,6 +289,10 @@ public class LogicaServer implements Observer {
 				doveWinner = m.getAutor();
 				doveDone = true;
 				snd.triggerSample(0);
+			}
+
+			if (m.getMsg().contains("next") && !cafeDone[0] && !cafeDone[1]) {
+				pantalla = 1;
 			}
 		}
 	}

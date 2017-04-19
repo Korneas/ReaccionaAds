@@ -1,6 +1,5 @@
 package servidor;
 
-import cliente.LogicaCliente;
 import processing.core.PApplet;
 
 public class MainServer extends PApplet{
